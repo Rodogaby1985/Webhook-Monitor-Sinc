@@ -2,7 +2,7 @@
 /*
 Plugin Name: Webhook Monitor & Sinc
 Description: Monitor visual de webhooks clave (por ID). Widget en Dashboard, indicador por pedido (nxsync). No envía emails. Cache en transient, AJAX ligero y polling configurable. Incluye botón de "Re-sincronizar" por pedido que fuerza cambios de estado para disparar webhooks y registra marca temporal para auditoría. Usa modal jQuery UI para confirmación y Dashicons para el botón.
-Version: 1.6.3
+Version: 1.6.4
 Author: Rodogaby1985 & Copilot
 */
 
