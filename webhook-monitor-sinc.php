@@ -734,6 +734,79 @@ function wms_render_order_sync_column($column, $post_id) {
     echo $dot . ' ' . $btn;
 }
 
+/* ---------------- Orders filter: Sinc. (nxsync) ---------------- */
+
+// Render select filter in WooCommerce > Orders list
+add_action('restrict_manage_posts', function($post_type) {
+    if ($post_type !== 'shop_order') return;
+
+    if (function_exists('get_current_screen')) {
+        $screen = get_current_screen();
+        if (!$screen || $screen->id !== 'edit-shop_order') return;
+    }
+
+    $current = isset($_GET['wms_sync_filter']) ? sanitize_text_field($_GET['wms_sync_filter']) : '';
+
+    echo '<select name="wms_sync_filter" style="min-width:160px;">';
+    echo '<option value="">' . esc_html__('Sinc.: Todas', 'wms') . '</option>';
+    echo '<option value="synced"' . selected($current, 'synced', false) . '>' . esc_html__('Sinc.: Sincronizado', 'wms') . '</option>';
+    echo '<option value="unsynced"' . selected($current, 'unsynced', false) . '>' . esc_html__('Sinc.: Sin sincronizar', 'wms') . '</option>';
+    echo '</select>';
+}, 20);
+
+// Apply filter to orders list query
+add_filter('posts_where', function($where, $query) {
+    if (!is_admin() || !$query->is_main_query()) return $where;
+
+    if (function_exists('get_current_screen')) {
+        $screen = get_current_screen();
+        if (!$screen || $screen->id !== 'edit-shop_order') return $where;
+    }
+
+    $filter = isset($_GET['wms_sync_filter']) ? sanitize_text_field($_GET['wms_sync_filter']) : '';
+    if ($filter !== 'synced' && $filter !== 'unsynced') return $where;
+
+    global $wpdb;
+
+    $where .= $wpdb->prepare(" AND {$wpdb->posts}.post_type = %s ", 'shop_order');
+
+    if ($filter === 'synced') {
+        $where .= "
+            AND EXISTS (
+                SELECT 1 FROM {$wpdb->postmeta} pm1
+                WHERE pm1.post_id = {$wpdb->posts}.ID
+                  AND pm1.meta_key = 'nxsync'
+                  AND pm1.meta_value <> ''
+            )
+            AND EXISTS (
+                SELECT 1 FROM {$wpdb->postmeta} pm2
+                WHERE pm2.post_id = {$wpdb->posts}.ID
+                  AND pm2.meta_key = 'nxsync_status'
+                  AND pm2.meta_value <> ''
+            )
+        ";
+    } else {
+        $where .= "
+            AND (
+                NOT EXISTS (
+                    SELECT 1 FROM {$wpdb->postmeta} pm1
+                    WHERE pm1.post_id = {$wpdb->posts}.ID
+                      AND pm1.meta_key = 'nxsync'
+                      AND pm1.meta_value <> ''
+                )
+                OR NOT EXISTS (
+                    SELECT 1 FROM {$wpdb->postmeta} pm2
+                    WHERE pm2.post_id = {$wpdb->posts}.ID
+                      AND pm2.meta_key = 'nxsync_status'
+                      AND pm2.meta_value <> ''
+                )
+            )
+        ";
+    }
+
+    return $where;
+}, 10, 2);
+
 /* ---------------- Settings page (expose poll interval) ---------------- */
 add_action('admin_menu', function() {
     add_options_page('Webhook Monitor & Sinc', 'Webhook Monitor & Sinc', 'manage_options', 'wms-settings', 'wms_settings_page');
