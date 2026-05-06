@@ -2,7 +2,7 @@
 /*
 Plugin Name: Webhook Monitor & Sinc
 Description: Monitor visual de webhooks clave (por ID). Widget en Dashboard, indicador por pedido (nxsync). No envía emails. Cache en transient, AJAX ligero y polling configurable. Incluye botón de "Re-sincronizar" por pedido que fuerza cambios de estado para disparar webhooks y registra marca temporal para auditoría. Usa modal jQuery UI para confirmación y Dashicons para el botón.
-Version: 1.6.4
+Version: 1.6.5
 Author: Rodogaby1985 & Copilot
 */
 
@@ -740,11 +740,6 @@ function wms_render_order_sync_column($column, $post_id) {
 add_action('restrict_manage_posts', function($post_type) {
     if ($post_type !== 'shop_order') return;
 
-    if (function_exists('get_current_screen')) {
-        $screen = get_current_screen();
-        if (!$screen || $screen->id !== 'edit-shop_order') return;
-    }
-
     $current = isset($_GET['wms_sync_filter']) ? sanitize_text_field($_GET['wms_sync_filter']) : '';
 
     echo '<select name="wms_sync_filter" style="min-width:160px;">';
@@ -758,10 +753,7 @@ add_action('restrict_manage_posts', function($post_type) {
 add_filter('posts_where', function($where, $query) {
     if (!is_admin() || !$query->is_main_query()) return $where;
 
-    if (function_exists('get_current_screen')) {
-        $screen = get_current_screen();
-        if (!$screen || $screen->id !== 'edit-shop_order') return $where;
-    }
+    if ($query->get('post_type') !== 'shop_order') return $where;
 
     $filter = isset($_GET['wms_sync_filter']) ? sanitize_text_field($_GET['wms_sync_filter']) : '';
     if ($filter !== 'synced' && $filter !== 'unsynced') return $where;
