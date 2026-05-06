@@ -270,7 +270,7 @@ function wms_dashboard_widget_render() {
     $poll_minutes = max(1, intval($settings['poll_interval_minutes']));
 
     echo '<div class="wms-widget-wrap">';
-    echo '<p class="wms-small"><strong>Estado de webhooks:</strong> Última comprobación: <span id="wms-checked">' . esc_html($checked) . '</span> &nbsp; <button id="wms-recheck" class="button">Revisar ahora</button> <small class="wms-small">Polling cada ' . esc_html($poll_minutes) . ' min</small></p>';
+    echo '<p class="wms-small"><strong>Estado de webhooks:</strong> Última comprobación: <span id="wms-checked">' . esc_html($checked) . '</span> &nbsp; <button id="wms-recheck" class="button">Revisar ahora</button></p>';
 
     echo '<table class="wms-table widefat"><thead><tr><th>Webhook</th><th>Estado</th><th class="wms-id-col">ID</th></tr></thead><tbody>';
     foreach ($status as $name => $info) {
@@ -682,7 +682,7 @@ function wms_admin_notice_if_inactive_webhooks() {
     }
     if (empty($inactive)) return;
     $list = implode(', ', array_map('esc_html', $inactive));
-    echo '<div class="notice notice-warning is-dismissible"><p><strong>Webhook Monitor &amp; Sinc:</strong> Webhook(s) inactivo(s)/no encontrados: ' . $list . '. Revisa el Dashboard o WooCommerce → Webhooks.</p></div>';
+    echo '<div class="notice notice-warning is-dismissible"><p><strong>Webhook Monitor &amp; Sinc:</strong> Webhook(s) inactivo(s)/no encontrados: ' . $list . '. Revisa el Dashboard o WooCommerce → Ajustes → Webhooks.</p></div>';
 }
 
 /* ---------------- Orders column: nxsync indicator + Re-sincronizar button (button version) ---------------- */
